@@ -165,11 +165,11 @@ zero_el = 0 - sensor.ElevationLimits(1, 1);
 Voxels1 = sph_vox_dist(ptCloud1_pol, arc_d, band_amt, elev_dif, zero_el);
 Voxels2 = sph_vox_dist(ptCloud2_pol, arc_d, band_amt, elev_dif, zero_el);
 
-% % Plot a specific voxel before the shadow implementation algorithm
-% figure(2)
-% plot3(ptCloud1(Voxels1{3,4},1),ptCloud1(Voxels1{3,4},2), ptCloud1(Voxels1{3,4},3), '.')
-% figure(3)
-% plot3(ptCloud1(Voxels1{3,5},1),ptCloud1(Voxels1{3,5},2), ptCloud1(Voxels1{3,5},3), '.')
+% Plot a specific voxel before the shadow implementation algorithm
+figure(2)
+plot3(ptCloud1(Voxels1{3,4},1),ptCloud1(Voxels1{3,4},2), ptCloud1(Voxels1{3,4},3), '.')
+figure(3)
+plot3(ptCloud1(Voxels1{3,5},1),ptCloud1(Voxels1{3,5},2), ptCloud1(Voxels1{3,5},3), '.')
 
 % *************** SHADOW MITIGATION ******************************
 
@@ -181,75 +181,99 @@ point_n = 60;
 points_Cloud1_A1 = shadow_mitig(ptCloud1_pol, Voxels1, jump, point_n, arc_d, band_amt, elev_dif, zero_el);
 points_Cloud2_A1 = shadow_mitig(ptCloud2_pol, Voxels2, jump, point_n, arc_d, band_amt, elev_dif, zero_el);
 
-% % ANALYSIS 2 - get points to be removed by method of analysis 2
-% % First, need new polar coordinates with center at ptcloud before alignment
-% % Also, need new voxel distribution 
-% ptCloud1_pol_b = conv_to_polar(ptCloud1, relpos);
-% ptCloud2_pol_b = conv_to_polar(ptCloud2, relpos);
-% Voxels1_b = sph_vox_dist(ptCloud1_pol_b, arc_d, band_amt, elev_dif, zero_el);
-% Voxels2_b = sph_vox_dist(ptCloud2_pol_b, arc_d, band_amt, elev_dif, zero_el);
+% Plot points removed from analysis 1
+figure(1)
+plot3(ptCloud1(points_Cloud1_A1,1),ptCloud1(points_Cloud1_A1,2), ptCloud1(points_Cloud1_A1,3), '.')
+hold on 
+plot3(ptCloud1(points_Cloud2_A1,1),ptCloud1(points_Cloud2_A1,2), ptCloud1(points_Cloud2_A1,3), '.')
+title('Shadow Mitig. Analysis 1')
 
-% points_Cloud1_A2 = shadow_mitig(ptCloud1_pol_b, Voxels1_b, jump, point_n, arc_d, band_amt, elev_dif, zero_el);
-% points_Cloud2_A2 = shadow_mitig(ptCloud2_pol_b, Voxels2_b, jump, point_n, arc_d, band_amt, elev_dif, zero_el);
+% ANALYSIS 2 - get points to be removed by method of analysis 2
+% First, need new polar coordinates with center at ptcloud before alignment
+% Also, need new voxel distribution 
+ptCloud1_pol_b = conv_to_polar(ptCloud1, relpos);
+ptCloud2_pol_b = conv_to_polar(ptCloud2, relpos);
+Voxels1_b = sph_vox_dist(ptCloud1_pol_b, arc_d, band_amt, elev_dif, zero_el);
+Voxels2_b = sph_vox_dist(ptCloud2_pol_b, arc_d, band_amt, elev_dif, zero_el);
 
-% % Create an array with the total points removed from A1 and A2
-% totalpts_Cloud1 = cat(1, points_Cloud1_A1, points_Cloud1_A2);
-% Repeat_check = unique(totalpts_Cloud1);
-% L1 = length(totalpts_Cloud1);
-% L2 = length(Repeat_check);
-% pts_repeated = L1-L2
+points_Cloud1_A2 = shadow_mitig(ptCloud1_pol_b, Voxels1_b, jump, point_n, arc_d, band_amt, elev_dif, zero_el);
+points_Cloud2_A2 = shadow_mitig(ptCloud2_pol_b, Voxels2_b, jump, point_n, arc_d, band_amt, elev_dif, zero_el);
+
+% Create an array with the total points removed from A1 and A2
+totalpts_Cloud1 = cat(1, points_Cloud1_A1, points_Cloud1_A2);
+totalpts_Cloud2 = cat(1, points_Cloud2_A1, points_Cloud2_A2);
+Repeat_check_C1 = unique(totalpts_Cloud1);
+Repeat_check_C2 = unique(totalpts_Cloud2);
+L1_C1 = length(totalpts_Cloud1);
+L2_C1 = length(Repeat_check_C1);
+L1_C2 = length(totalpts_Cloud2);
+L2_C2 = length(Repeat_check_C2);
+pts_repeated_C1 = L1_C1-L2_C1
+pts_repeated_C2 = L1_C2-L2_C2
 % 170 of the 231 points removed from A2 were repeated
 
-% totalpts_Cloud2 = cat(1, points_Cloud2_A1, points_Cloud2_A2);
+
+% Plot points removed from analysis 2
+figure(4)
+plot3(ptCloud1(:,1),ptCloud1(:,2),ptCloud1(:,3),'.')
+hold on
+plot3(ptCloud2(:,1),ptCloud2(:,2),ptCloud2(:,3),'.')
+hold on 
+plot3(ptCloud1(points_Cloud1_A2,1),ptCloud1(points_Cloud1_A2,2), ptCloud1(points_Cloud1_A2,3), '.')
+hold on 
+plot3(ptCloud1(points_Cloud2_A2,1),ptCloud1(points_Cloud2_A2,2), ptCloud1(points_Cloud2_A2,3), '.')
+title('Shadow Mitig. Analysis 2')
 
 % Remove points from each point cloud for both analysis 1 and analysis 2
 ptCloud1_A1 = ptCloud1;
 ptCloud1_A1(points_Cloud1_A1,:) = NaN;
 ptCloud2_A1 = ptCloud2;
 ptCloud2_A1(points_Cloud2_A1,:) = NaN;
-% ptCloud1_A2 = ptCloud1;
-% ptCloud1_A2(points_Cloud1_A2,:) = NaN;
-% ptCloud2_A2 = ptCloud2;
-% ptCloud2_A2(points_Cloud2_A2,:) = NaN;
+ptCloud1_A2 = ptCloud1;
+ptCloud1_A2(points_Cloud1_A2,:) = NaN;
+ptCloud2_A2 = ptCloud2;
+ptCloud2_A2(points_Cloud2_A2,:) = NaN;
 
 % Create clouds with both analyses removed
 ptCloud1_A1_A2 = ptCloud1;
 ptCloud2_A1_A2 = ptCloud2;
-% ptCloud1_A1_A2(totalpts_Cloud1,:) = NaN;
-% ptCloud2_A1_A2(totalpts_Cloud2,:) = NaN;
+ptCloud1_A1_A2(totalpts_Cloud1,:) = NaN;
+ptCloud2_A1_A2(totalpts_Cloud2,:) = NaN;
 
 
 
-% % PLOT EXAMPLE OF A POINT CLOUD VOXEL AFFECTED BY THE SHADOW MITIGATION A1
-% figure(2)
-% hold on
-% plot3(ptCloud1_A1(Voxels1{3,4},1),ptCloud1_A1(Voxels1{3,4},2), ptCloud1_A1(Voxels1{3,4},3), '.')
-% % PLOT EXAMPLE OF A POINT CLOUD VOXEL AFFECTED BY THE SHADOW MITIGATION A2
-% figure(3)
-% hold on 
-% plot3(ptCloud1_A2(Voxels1_b{3,5},1),ptCloud1_A2(Voxels1_b{3,5},2),ptCloud1_A2(Voxels1_b{3,5},3), '.');
+% PLOT EXAMPLE OF A POINT CLOUD VOXEL AFFECTED BY THE SHADOW MITIGATION A1
+figure(2)
+hold on
+plot3(ptCloud1_A1(Voxels1{3,4},1),ptCloud1_A1(Voxels1{3,4},2), ptCloud1_A1(Voxels1{3,4},3), '.')
+% PLOT EXAMPLE OF A POINT CLOUD VOXEL AFFECTED BY THE SHADOW MITIGATION A2
+figure(3)
+hold on 
+plot3(ptCloud1_A2(Voxels1_b{3,5},1),ptCloud1_A2(Voxels1_b{3,5},2),ptCloud1_A2(Voxels1_b{3,5},3), '.');
 
 
 % Plot new point clouds after shadow mitigation analysis 1
 % CHECK FIGURE NUMBERS
-figure(2)
+figure(5)
 plot3(ptCloud1_A1(:,1),ptCloud1_A1(:,2),ptCloud1_A1(:,3),'.')
 hold on
 plot3(ptCloud2_A1(:,1),ptCloud2_A1(:,2),ptCloud2_A1(:,3),'.')
-
+title('Shadow Mitig. Analysis 1 removed')
 
 
 % PLOT NEW POINT CLOUDS AFTER SHADOW MITIGATION analysis 2
-% figure(5)
-% plot3(ptCloud1_A2(:,1),ptCloud1_A2(:,2),ptCloud1_A2(:,3),'.')
-% hold on
-% plot3(ptCloud2_A2(:,1),ptCloud2_A2(:,2),ptCloud2_A2(:,3),'.')
-% 
-% % PLOT NEW POINT CLOUDS COMBINING BOTH SHADOW MITIGATION ANALYSES
-% figure(6)
-% plot3(ptCloud1_A1_A2(:,1),ptCloud1_A1_A2(:,2),ptCloud1_A1_A2(:,3),'.')
-% hold on 
-% plot3(ptCloud2_A1_A2(:,1),ptCloud2_A1_A2(:,2),ptCloud2_A1_A2(:,3),'.')
+figure(6)
+plot3(ptCloud1_A2(:,1),ptCloud1_A2(:,2),ptCloud1_A2(:,3),'.')
+hold on
+plot3(ptCloud2_A2(:,1),ptCloud2_A2(:,2),ptCloud2_A2(:,3),'.')
+title('Shadow Mitig. Analysis 2 removed')
+
+% PLOT NEW POINT CLOUDS COMBINING BOTH SHADOW MITIGATION ANALYSES
+figure(7)
+plot3(ptCloud1_A1_A2(:,1),ptCloud1_A1_A2(:,2),ptCloud1_A1_A2(:,3),'.')
+hold on 
+plot3(ptCloud2_A1_A2(:,1),ptCloud2_A1_A2(:,2),ptCloud2_A1_A2(:,3),'.')
+title('Shadow Mitig. Analysis 1 AND 2 removed')
 
 % ************** NDT AFTER SHADOW MITIGATION **************
 
@@ -296,9 +320,9 @@ U_q = quiver_setup(vox_number, means_dif, v_az, v_elev, pos_x);
 V_q = quiver_setup(vox_number, means_dif, v_az, v_elev, pos_y);
 W_q = quiver_setup(vox_number, means_dif, v_az, v_elev, pos_z);
 
-% Form quiver plot 
-figure(3)
-quiver3(X_q, Y_q, Z_q, U_q, V_q, W_q)
+% % Form quiver plot 
+% figure(3)
+% quiver3(X_q, Y_q, Z_q, U_q, V_q, W_q)
 % axis equal
 
 
@@ -312,9 +336,9 @@ quiver3(X_q, Y_q, Z_q, U_q, V_q, W_q)
 function ptCloud_polar = conv_to_polar(ptCloud, origin)
     ptCloud_polar = zeros(length(ptCloud),3);
     for i = 1:length(ptCloud)
-        X = ptCloud(i,1) - origin(1);
-        Y = ptCloud(i,2) - origin(2);
-        Z = ptCloud(i,3) - origin(3);
+        X = ptCloud(i,1) + origin(1);
+        Y = ptCloud(i,2) + origin(2);
+        Z = ptCloud(i,3) + origin(3);
         [theta, rho, z] = cart2pol(X,Y,Z);
         ptCloud_polar(i,:) = [theta, rho, z];
         azi_correct = atan2(Y,X);
